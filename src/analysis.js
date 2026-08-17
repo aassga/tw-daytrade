@@ -1,4 +1,4 @@
-const n = (value) => Number(String(value ?? '').replaceAll(',', '').trim()) || 0
+﻿const n = (value) => Number(String(value ?? '').replaceAll(',', '').trim()) || 0
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value))
 
 export function rocDate(value) {
@@ -95,10 +95,14 @@ function enrich(stock) {
 export function buildAnalysis(raw) {
   const twseEligibility = new Map((raw.twseEligible || []).map(x => [x.Code, x]))
   const tpexEligibility = new Map((raw.tpexEligible || []).map(x => [x['證券代號'], x]))
-  const twse = (raw.twseQuotes || []).map(x => normalizeTwse(x, twseEligibility.get(x.Code)))
-  const latestTpexDate = (raw.tpexEligible?.[0]?.['資料日期']) || ''
+  const dateKey = value => String(value || '').replaceAll('/', '')
+  const latestDate = [...(raw.twseQuotes || []), ...(raw.tpexQuotes || [])]
+    .reduce((latest, row) => dateKey(row.Date) > latest ? dateKey(row.Date) : latest, '')
+  const twse = (raw.twseQuotes || [])
+    .filter(x => !latestDate || dateKey(x.Date) === latestDate)
+    .map(x => normalizeTwse(x, twseEligibility.get(x.Code)))
   const tpex = (raw.tpexQuotes || [])
-    .filter(x => !latestTpexDate || x.Date === latestTpexDate)
+    .filter(x => !latestDate || dateKey(x.Date) === latestDate)
     .map(x => normalizeTpex(x, tpexEligibility.get(x.SecuritiesCompanyCode)))
 
   return [...twse, ...tpex]
