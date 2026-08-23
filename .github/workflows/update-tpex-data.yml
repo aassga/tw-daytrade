@@ -1,0 +1,58 @@
+name: Update TPEx market snapshot
+
+on:
+  schedule:
+    - cron: '30 22 * * 0-4'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-tpex-market-snapshot
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download official TPEx data
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p data
+          node <<'NODE'
+          const urls = [
+            'https://www.tpex.org.tw/openapi/v1/tpex_mainboard_quotes',
+            'https://www.tpex.org.tw/openapi/v1/tpex_securities',
+          ]
+          const responses = await Promise.all(urls.map(url => fetch(url, {
+            headers: { 'User-Agent': 'Mozilla/5.0 TW-Daytrade-Dashboard/1.0' },
+          })))
+          if (responses.some(response => !response.ok)) {
+            throw new Error('TPEx response: ' + responses.map(response => response.status).join(', '))
+          }
+          const [tpexQuotes, tpexEligible] = await Promise.all(responses.map(response => response.json()))
+          const payload = {
+            fetchedAt: new Date().toISOString(),
+            tpexQuotes,
+            tpexEligible,
+          }
+          await import('node:fs/promises').then(fs =>
+            fs.writeFile('data/tpex.json', JSON.stringify(payload) + '\n', 'utf8'))
+          NODE
+
+      - name: Commit changed snapshot
+        shell: bash
+        run: |
+          if git diff --quiet -- data/tpex.json; then
+            echo "TPEx snapshot is unchanged."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- data/tpex.json
+          git commit -m "chore: update TPEx market snapshot"
+          git push
