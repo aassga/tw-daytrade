@@ -7,7 +7,9 @@
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "start": "node server.mjs"
+    "start": "node server.mjs",
+    "worker:dev": "npm run build && wrangler dev",
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
     "@vitejs/plugin-vue": "latest",
@@ -15,5 +17,7 @@
     "vite": "latest",
     "vue": "latest"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "wrangler": "^4.125.0"
+  }
 }

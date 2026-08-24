@@ -1,8 +1,8 @@
-﻿# 盤前作戰室｜台股當沖篩選台
+# 盤前作戰室｜台股當沖篩選台
 
-Vue 3 + Vite 製作的上市櫃盤前當沖候選篩選工具。資料由臺灣證券交易所與證券櫃檯買賣中心官方 OpenAPI 即時抓取，並以流動性、波動效率、方向結構與跳空風險進行規則式評分。
+Vue 3 + Vite 製作的上市櫃盤前當沖候選篩選工具。資料由臺灣證券交易所與證券櫃檯買賣中心官方 OpenAPI 取得，並以流動性、波動效率、方向結構與跳空風險進行規則式評分。
 
-正式伺服器支援 Node.js 16 以上版本；官方資料讀取包含自動重試與最近成功資料的磁碟快取。
+本機 Node 伺服器保留磁碟快取；正式網站以 Cloudflare Worker 提供 Vue 靜態資源、行情 API 與邊緣快取。建議使用 Node.js 22。
 
 盤前 08:30～09:00 會讀取交易所公開試撮價量，交易時段切換為最新成交行情並約每 5 秒更新；試撮價僅供參考，不是實際成交價。
 
@@ -26,6 +26,18 @@ npm run dev
 ```
 
 開發頁面為 `http://localhost:5173`。
+
+## Cloudflare 部署
+
+```bash
+pnpm install
+pnpm run deploy
+```
+
+- Worker 入口：`worker/index.js`
+- Cloudflare 設定：`wrangler.jsonc`
+- 正式網址：<https://tw-daytrade-dashboard.98412060.workers.dev>
+- 櫃買中心會限制 Cloudflare 機房請求，因此正式 Worker 讀取由 GitHub Actions 每個交易日上午更新的官方資料快照。
 
 ## 資料與限制
 

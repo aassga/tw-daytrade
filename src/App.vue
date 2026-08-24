@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { buildAnalysis, marketState, rocDate } from './analysis'
 
@@ -87,7 +87,7 @@ async function load(force = false) {
       const twseDate = rocDate(twseRawDate)
       const tpexDate = rocDate(tpexRawDate)
       sourceDate.value = `上市 ${twseDate} · 上櫃 ${tpexDate}`
-      briefDate.value = `上市 ${twseDate.slice(5)} · 上櫃 ${tpexDate.slice(5)}`
+      briefDate.value = `TWSE ${twseDate.slice(5)} · TPEX ${tpexDate.slice(5)}`
       if (!stocks.value.length) throw new Error('官方資料已回應，但沒有符合基本流動性與當沖資格的標的')
       if (twseRawDate && tpexRawDate && twseRawDate !== tpexRawDate) {
         dataWarning.value = `官方來源日期不一致（上市 ${twseDate}／上櫃 ${tpexDate}），較舊市場已自動排除，不提供過期建議。`
@@ -157,7 +157,7 @@ onBeforeUnmount(() => clearInterval(liveTimer))
     <header class="site-header">
       <a class="brand" href="#top" aria-label="盤前作戰室首頁">
         <span class="brand-mark">前</span>
-        <span><b>盤前作戰室</b><small>台股當沖決策台</small></span>
+        <span><b>盤前作戰室</b><small>TAIWAN DAY TRADE DESK</small></span>
       </a>
       <div class="header-meta">
         <span class="live-dot"></span>
@@ -168,7 +168,7 @@ onBeforeUnmount(() => clearInterval(liveTimer))
 
     <section id="top" class="hero">
       <div class="hero-copy">
-        <div class="eyebrow">盤前交易摘要 · {{ briefDate }}</div>
+        <div class="eyebrow">PRE-MARKET BRIEF · {{ briefDate }}</div>
         <h1>今天，只做<br><em>有條件</em>的交易。</h1>
         <p>依最新完成交易日的價量、振幅與收盤強弱，從官方可當沖標的中，整理今日必須等待價格確認的多空候選。</p>
       </div>
@@ -299,7 +299,7 @@ onBeforeUnmount(() => clearInterval(liveTimer))
     </section>
 
     <footer>
-      <div><b>資料來源</b><a href="https://openapi.twse.com.tw/" target="_blank">臺灣證券交易所開放資料 ↗</a><a href="https://www.tpex.org.tw/openapi/" target="_blank">證券櫃檯買賣中心開放資料 ↗</a><a href="https://mis.twse.com.tw/stock/index.jsp" target="_blank">盤前試撮與即時市況 ↗</a></div>
+      <div><b>資料來源</b><a href="https://openapi.twse.com.tw/" target="_blank">臺灣證券交易所 OpenAPI ↗</a><a href="https://www.tpex.org.tw/openapi/" target="_blank">證券櫃檯買賣中心 OpenAPI ↗</a><a href="https://mis.twse.com.tw/stock/index.jsp" target="_blank">盤前試撮與即時市況 ↗</a></div>
       <p>本工具使用最新完成交易日公開資料進行規則式篩選，盤前試撮與盤中最新行情來自交易所公開市況，可能延遲或短暫缺值，且不包含個人部位資訊；條件分代表型態完整度，不是上漲／下跌機率。試撮價不是成交價，畫面價格不可視為開盤前直接掛單價，也不構成投資建議或獲利保證。額度張數以觸發價與 95% 可用額度估算，不包含券商實際手續費、稅負與個別風控規則。先賣後買前請再次確認券商顯示的現沖資格；未完成反向買進可能產生強制買回與額外費用。</p>
     </footer>
   </main>
